@@ -43,10 +43,49 @@ async function run() {
 
     //* New Toys
 
+    app.get("/newToys", async (req, res) => {
+      let query = {};
+      if (req.query?.email) {
+        query = { email: req.query.email };
+      }
+
+      const result = await newToysCollection.find(query).toArray();
+      res.send(result);
+    });
+
+    app.get("/newToys/:id", async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: new ObjectId(id) };
+      const newToys = await newToysCollection.findOne(query);
+      res.send(newToys);
+    });
+
     app.post("/newToys", async (req, res) => {
       const newToys = req.body;
       console.log(newToys);
       const result = await newToysCollection.insertOne(newToys);
+      res.send(result);
+    });
+
+    app.put("/newToys/:id", async (req, res) => {
+      const id = req.params.id;
+      const filter = { _id: new ObjectId(id) };
+      const options = { upsert: true };
+      const updatedToys = req.body;
+      const toys = {
+        $set: {
+          photo: updatedToys.photo,
+          sellerName: updatedToys.sellerName,
+          email: updatedToys.email,
+          availableQuantity: updatedToys.availableQuantity,
+          detailDescription: updatedToys.detailDescription,
+          price: updatedToys.price,
+          rating: updatedToys.rating,
+          subCategory: updatedToys.subCategory,
+          toyName: updatedToys.toyName,
+        },
+      };
+      const result = await newToysCollection.updateOne(filter, toys, options);
       res.send(result);
     });
 
