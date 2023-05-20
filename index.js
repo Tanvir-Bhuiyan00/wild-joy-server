@@ -26,6 +26,7 @@ async function run() {
     await client.connect();
 
     const toysCollection = client.db("wildJoyDB").collection("toys");
+    const newToysCollection = client.db("wildJoyDB").collection("newToys");
 
     app.get("/toys", async (req, res) => {
       const cursor = toysCollection.find();
@@ -33,12 +34,21 @@ async function run() {
       res.send(result);
     });
 
-    app.get('/toys/:id', async(req, res) => {
+    app.get("/toys/:id", async (req, res) => {
       const id = req.params.id;
-      const query = {_id: new ObjectId(id)}
+      const query = { _id: new ObjectId(id) };
       const toyDetails = await toysCollection.findOne(query);
       res.send(toyDetails);
-  })
+    });
+
+    //* New Toys
+
+    app.post("/newToys", async (req, res) => {
+      const newToys = req.body;
+      console.log(newToys);
+      const result = await newToysCollection.insertOne(newToys);
+      res.send(result);
+    });
 
     // Send a ping to confirm a successful connection
     await client.db("admin").command({ ping: 1 });
