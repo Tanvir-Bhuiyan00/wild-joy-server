@@ -48,13 +48,19 @@ async function run() {
       if (req.query?.email) {
         query = { email: req.query.email };
       }
-      const sortDirection = req.query?.sort === "asc" ? 1 : -1;
-      const sortField = "price";
+
+      let sortField = "price";
+      let sortOrder = 1;
+
+      if (req.query?.sort === "desc") {
+        sortOrder = -1;
+      }
+
 
       const result = await newToysCollection
         .find(query)
         .limit(20)
-        .sort({ [sortField]: sortDirection })
+        .sort({ [sortField]: sortOrder })
         .toArray();
       res.send(result);
     });
