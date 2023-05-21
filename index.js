@@ -48,16 +48,41 @@ async function run() {
       if (req.query?.email) {
         query = { email: req.query.email };
       }
+      const sortDirection = req.query?.sort === "asc" ? 1 : -1;
+      const sortField = "price";
 
-      const result = await newToysCollection.find(query).toArray();
+      const result = await newToysCollection
+        .find(query)
+        .limit(20)
+        .sort({ [sortField]: sortDirection })
+        .toArray();
       res.send(result);
     });
+
+    // app.get("/newToys", async (req, res) => {
+    //   const cursor = newToysCollection.find().limit(20);
+    //   const result = await cursor.toArray();
+    //   res.send(result);
+    // });
 
     app.get("/newToys/:id", async (req, res) => {
       const id = req.params.id;
       const query = { _id: new ObjectId(id) };
       const newToys = await newToysCollection.findOne(query);
       res.send(newToys);
+    });
+
+    app.get("/toySearchByTitle/:text", async (req, res) => {
+      const searchText = req.params.text;
+      const result = await newToysCollection
+        .find({
+          $or: [
+            { toyName: { $regex: searchText, $options: "i" } },
+            { subCategory: { $regex: searchText, $options: "i" } },
+          ],
+        })
+        .toArray();
+      res.send(result);
     });
 
     app.post("/newToys", async (req, res) => {
